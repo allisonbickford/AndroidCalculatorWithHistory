@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ConversionCalculator</string>
+    <string name="lengthTitle">Length Converter</string>
+    <string name="volumeTitle">Volume Converter</string>
+    <string name="fromLabelText">From</string>
+    <string name="toLabelText">To</string>
+    <string name="fromUnits">Yards</string>
+    <string name="toUnit">Meters</string>
+    <string name="calcButtonText">Calculate</string>
+    <string name="clearButtonText">Clear</string>
+    <string name="modeButtonText">Mode</string>
+    <string name="title_activity_tool_bar">ToolBar</string>
+    <string name="title_activity_menu">Menu</string>
+    <string name="settingsLabel">Settings</string>
+    <string name="title_activity_history">HistoryActivity</string>
+    <string name="historyLabel">History</string>
+</resources>
