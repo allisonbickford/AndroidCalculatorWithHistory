@@ -204,17 +204,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else if (requestCode == ResultCode.HISTORY_CODE) {
-            val vals = data?.getStringArrayExtra("item")
+            if (resultCode != Activity.RESULT_CANCELED) {
+                val vals = data?.getStringArrayExtra("item")
 
-            val title = findViewById<TextView>(R.id.titleLabel)
-            if (title.text != vals!![2]) {
-                changeMode()
+                val title = findViewById<TextView>(R.id.titleLabel)
+                if (title.text != vals!![2]) {
+                    changeMode()
+                }
+                findViewById<EditText>(R.id.fromInput).setText(vals[0])
+                findViewById<EditText>(R.id.toInput).setText(vals[1])
+
+                findViewById<TextView>(R.id.fromLabel).text = vals[3]
+                findViewById<TextView>(R.id.toLabel).text = vals[4]
             }
-            findViewById<EditText>(R.id.fromInput).setText(vals[0])
-            findViewById<EditText>(R.id.toInput).setText(vals[1])
-
-            findViewById<TextView>(R.id.fromLabel).text = vals[3]
-            findViewById<TextView>(R.id.toLabel).text = vals[4]
         }
     }
 }
