@@ -9,34 +9,30 @@ import java.util.HashMap
  *
  * TODO: Replace all uses of this class before publishing your app.
  */
-object HistoryContent {
+public class HistoryContent {
 
-    /**
-     * An array of sample (dummy) items.
-     */
-    val ITEMS: MutableList<DummyItem> = ArrayList()
-
+    public static final List<HistoryItem> ITEMS = new ArrayList<HistoryItem>();
     /**
      * A map of sample (dummy) items, by ID.
      */
-    val ITEM_MAP: MutableMap<String, DummyItem> = HashMap()
+    val ITEM_MAP: MutableMap<String, HistoryItem> = HashMap()
 
     private val COUNT = 25
 
     init {
         // Add some sample items.
         for (i in 1..COUNT) {
-            addItem(createDummyItem(i))
+            addItem(createHistoryItem(i))
         }
     }
 
-    private fun addItem(item: DummyItem) {
+    private fun addItem(item: HistoryItem) {
         ITEMS.add(item)
         ITEM_MAP.put(item.id, item)
     }
 
-    private fun createDummyItem(position: Int): DummyItem {
-        return DummyItem(position.toString(), "Item " + position, makeDetails(position))
+    private fun createHistoryItem(position: Int): HistoryItem {
+        return HistoryItem(position.toString(), "Item " + position, makeDetails(position))
     }
 
     private fun makeDetails(position: Int): String {
@@ -51,7 +47,7 @@ object HistoryContent {
     /**
      * A dummy item representing a piece of content.
      */
-    data class DummyItem(val id: String, val content: String, val details: String) {
+    data class HistoryItem(val id: String, val content: String, val details: String) {
         override fun toString(): String = content
     }
 }
