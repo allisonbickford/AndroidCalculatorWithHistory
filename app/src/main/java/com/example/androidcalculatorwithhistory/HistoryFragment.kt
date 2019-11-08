@@ -11,7 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.example.androidcalculatorwithhistory.dummy.HistoryContent
-import com.example.androidcalculatorwithhistory.dummy.HistoryContent.DummyItem
+import com.example.androidcalculatorwithhistory.dummy.HistoryContent.HistoryItem
+import androidx.recyclerview.widget.DividerItemDecoration
+
 
 /**
  * A fragment representing a list of Items.
@@ -47,6 +49,13 @@ class HistoryFragment : Fragment() {
                     else -> GridLayoutManager(context, columnCount)
                 }
                 adapter = HistoryAdapter(HistoryContent.ITEMS, listener)
+
+                // ??
+                val did = DividerItemDecoration(
+                    view.getContext(),
+                    DividerItemDecoration.VERTICAL
+                )
+                view.addItemDecoration(did)
             }
         }
         return view
@@ -79,7 +88,7 @@ class HistoryFragment : Fragment() {
      */
     interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onListFragmentInteraction(item: DummyItem?)
+        fun onListFragmentInteraction(item: HistoryItem)
     }
 
     companion object {

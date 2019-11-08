@@ -14,6 +14,8 @@ import com.example.androidcalculatorwithhistory.UnitsConverter.*
 import android.content.Intent
 import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.main.activity_main.*
+import com.example.androidcalculatorwithhistory.dummy.HistoryContent
+import org.joda.time.DateTime
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,8 +24,11 @@ class MainActivity : AppCompatActivity() {
     private var toLenUnits = LengthUnits.Meters
     private var fromVolUnits = VolumeUnits.Gallons
     private var toVolUnits = VolumeUnits.Liters
-    private val SETTINGS_CODE = 1
-    private val HISTORY_CODE = 2
+
+    object ResultCode {
+        val SETTINGS_CODE = 1
+        val HISTORY_CODE = 2
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +101,17 @@ class MainActivity : AppCompatActivity() {
             fieldToPopulate.setText(
                 convert(fieldToRead.text.toString().toDouble(), fromUnits, toUnits).toString())
         }
+
+        // remember the calculation.
+        val item = HistoryContent.HistoryItem(
+            fromInput.text.toString().toDouble(),
+            toInput.text.toString().toDouble(),
+            findViewById<TextView>(R.id.titleLabel).text.toString(),
+            toUnits.text.toString(),
+            fromUnits.text.toString(),
+            DateTime.now()
+        )
+        HistoryContent.addItem(item)
     }
 
     private fun changeMode() {
@@ -130,7 +146,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_history -> {
                 val intent = Intent(this, HistoryActivity::class.java)
-                startActivityForResult(intent, HISTORY_CODE)
+                startActivityForResult(intent, ResultCode.HISTORY_CODE)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -149,12 +165,12 @@ class MainActivity : AppCompatActivity() {
                 putExtra("TO_UNITS", toVolUnits.name)
             }
         }
-        startActivityForResult(intent, SETTINGS_CODE)
+        startActivityForResult(intent, ResultCode.SETTINGS_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SETTINGS_CODE) {
+        if (requestCode == ResultCode.SETTINGS_CODE) {
             clearFields()
             if (resultCode == Activity.RESULT_OK) {
                 val intentFromUnits = data?.getStringExtra("FROM_UNITS")
@@ -187,6 +203,18 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        } else if (requestCode == ResultCode.HISTORY_CODE) {
+            val vals = data?.getStringArrayExtra("item")
+
+            val title = findViewById<TextView>(R.id.titleLabel)
+            if (title.text != vals!![2]) {
+                changeMode()
+            }
+            findViewById<EditText>(R.id.fromInput).setText(vals[0])
+            findViewById<EditText>(R.id.toInput).setText(vals[1])
+
+            findViewById<TextView>(R.id.fromLabel).text = vals[3]
+            findViewById<TextView>(R.id.toLabel).text = vals[4]
         }
     }
 }

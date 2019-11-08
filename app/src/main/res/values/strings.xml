@@ -14,4 +14,6 @@
     <string name="settingsLabel">Settings</string>
     <string name="title_activity_history">HistoryActivity</string>
     <string name="historyLabel">History</string>
+    <string name="origination">Origination</string>
+    <string name="date_of_calculation">date of calculation</string>
 </resources>

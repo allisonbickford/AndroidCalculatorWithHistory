@@ -1,7 +1,8 @@
 package com.example.androidcalculatorwithhistory.dummy
 
 import java.util.ArrayList
-import java.util.HashMap
+import org.joda.time.DateTime
+
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -14,29 +15,19 @@ object HistoryContent {
     /**
      * An array of sample (dummy) items.
      */
-    val ITEMS: MutableList<DummyItem> = ArrayList()
-
-    /**
-     * A map of sample (dummy) items, by ID.
-     */
-    val ITEM_MAP: MutableMap<String, DummyItem> = HashMap()
-
-    private val COUNT = 25
+    val ITEMS: MutableList<HistoryItem> = ArrayList()
 
     init {
-        // Add some sample items.
-        for (i in 1..COUNT) {
-            addItem(createDummyItem(i))
-        }
+        val now: DateTime = DateTime.now()
+        addItem(HistoryItem(2.0, 1.829, "Length", "Yards", "Meters", now.minusDays(1)))
+        addItem(HistoryItem(1.0, 3.785, "Volume", "Gallons", "Liters", now.minusDays(1)))
+        addItem(HistoryItem(2.0, 1.829, "Length", "Yards", "Meters", now.plusDays(1)))
+        addItem(HistoryItem(1.0, 3.785, "Volume", "Gallons", "Liters", now.plusDays(1)))
     }
 
-    private fun addItem(item: DummyItem) {
+
+    public fun addItem(item: HistoryItem) {
         ITEMS.add(item)
-        ITEM_MAP.put(item.id, item)
-    }
-
-    private fun createDummyItem(position: Int): DummyItem {
-        return DummyItem(position.toString(), "Item " + position, makeDetails(position))
     }
 
     private fun makeDetails(position: Int): String {
@@ -51,7 +42,14 @@ object HistoryContent {
     /**
      * A dummy item representing a piece of content.
      */
-    data class DummyItem(val id: String, val content: String, val details: String) {
-        override fun toString(): String = content
+    class HistoryItem(
+        val fromVal: Double?, val toVal: Double?, val mode: String,
+        val fromUnits: String, val toUnits: String, val timestamp: DateTime
+    ) {
+
+        override fun toString(): String {
+            return this.fromVal.toString() + " " + this.fromUnits + " = " + this.toVal + " " + this.toUnits
+        }
     }
+
 }
