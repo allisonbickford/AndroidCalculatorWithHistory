@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         val calcButton = findViewById<Button>(R.id.calcButton)
         val clearButton = findViewById<Button>(R.id.clearButton)
         val modeButton = findViewById<Button>(R.id.modeButton)
