@@ -5,33 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
-
+import android.widget.ImageView
 import com.example.androidcalculatorwithhistory.HistoryFragment.OnListFragmentInteractionListener
-import com.example.androidcalculatorwithhistory.dummy.HistoryContent.DummyItem
-
-import kotlinx.android.synthetic.main.fragment_history.view.*
+import com.example.androidcalculatorwithhistory.dummy.HistoryContent.HistoryItem
 
 /**
- * [RecyclerView.Adapter] that can display a [DummyItem] and makes a call to the
+ * [RecyclerView.Adapter] that can display a [HistoryItem] and makes a call to the
  * specified [OnListFragmentInteractionListener].
  * TODO: Replace the implementation with code for your data type.
  */
 class HistoryAdapter(
-    private val mValues: List<DummyItem>,
+    private val mValues: List<HistoryItem>,
     private val mListener: OnListFragmentInteractionListener?
-) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>(){
 
-    private val mOnClickListener: View.OnClickListener
-
-    init {
-        mOnClickListener = View.OnClickListener { v ->
-            val item = v.tag as DummyItem
-            // Notify the active callbacks interface (the activity, if the fragment is attached to
-            // one) that an item has been selected.
-            mListener?.onListFragmentInteraction(item)
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -40,24 +27,52 @@ class HistoryAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = mValues[position]
-        holder.mIdView.text = item.id
-        holder.mContentView.text = item.content
-
-        with(holder.mView) {
-            tag = item
-            setOnClickListener(mOnClickListener)
+        holder.mItem = mValues[position]
+        holder.mP1?.text = (holder.mItem.toString())
+        holder.mDateTime?.text = (holder.mItem?.timestamp.toString())
+        if(holder.mItem!!.mode.equals("Length")){
+            holder.mImage?.setImageDrawable(
+                holder.mImage.resources?.
+                getDrawable(R.drawable.length))
+        }else{
+            holder.mImage?.setImageDrawable(
+                holder.mImage.resources?.
+                getDrawable(R.drawable.volume))
         }
+
+        holder.mView?.setOnClickListener(View.OnClickListener {
+            mListener?.onListFragmentInteraction(
+                holder.mItem
+            )
+        })
     }
 
     override fun getItemCount(): Int = mValues.size
 
-    inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
-        val mIdView: TextView = mView.item_number
-        val mContentView: TextView = mView.content
+
+    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val mView: View?
+        val mP1: TextView?
+        val mDateTime: TextView?
+        var mItem: HistoryItem? = null
+        val mImage: ImageView?
+
+
+        init {
+            mView = view
+            mP1 = view.findViewById(R.id.p1) as TextView
+            mDateTime = view.findViewById(R.id.timestamp) as TextView
+            mImage = view.findViewById(R.id.imageView)
+        }
 
         override fun toString(): String {
-            return super.toString() + " '" + mContentView.text + "'"
+            return super.toString() + " '" + mDateTime?.text + "'"
         }
     }
+
+    inner class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view)
+
+    inner class FooterViewHolder(view: View) : RecyclerView.ViewHolder(view)
+
 }
+

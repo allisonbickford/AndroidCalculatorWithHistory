@@ -1,20 +1,20 @@
 package com.example.androidcalculatorwithhistory
 
-import android.app.Activity
 import android.content.Context
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.view.Menu;
-import android.view.MenuItem
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.example.androidcalculatorwithhistory.UnitsConverter.*
-import android.content.Intent
-import android.view.inputmethod.InputMethodManager
+import com.example.androidcalculatorwithhistory.dummy.HistoryContent
 import kotlinx.android.synthetic.main.activity_main.*
-
+import org.joda.time.DateTime
 
 class MainActivity : AppCompatActivity() {
     private var isLength = true
@@ -22,13 +22,16 @@ class MainActivity : AppCompatActivity() {
     private var toLenUnits = LengthUnits.Meters
     private var fromVolUnits = VolumeUnits.Gallons
     private var toVolUnits = VolumeUnits.Liters
-    private val SETTINGS_CODE = 1
-    private val HISTORY_CODE = 2
+    private var SETTINGS_CODE = 1
+    private var HISTORY_CODE = 2
+
+    private enum class Mode { Length, Volume }
+
+    private var mode: Mode = Mode.Length
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         val calcButton = findViewById<Button>(R.id.calcButton)
         val clearButton = findViewById<Button>(R.id.clearButton)
@@ -84,17 +87,36 @@ class MainActivity : AppCompatActivity() {
 
         val fieldToRead = if (fromInput.text.isNotEmpty()) fromInput else toInput
         val fieldToPopulate = if (fromInput.text.isEmpty()) fromInput else toInput
+        val item: HistoryContent.HistoryItem?
+
 
         if (isLength) {
             val fromUnits = if (fieldToRead == fromInput) fromLenUnits else toLenUnits
             val toUnits = if (fromUnits == fromLenUnits) toLenUnits else fromLenUnits
+            val dVal = fieldToRead.text.toString().toDouble()
+            val cVal = convert(dVal, fromUnits, toUnits)
+
             fieldToPopulate.setText(
                 convert(fieldToRead.text.toString().toDouble(), fromUnits, toUnits).toString())
+            item = HistoryContent.HistoryItem(
+                dVal, cVal, mode.toString(),
+                toUnits.toString(), fromUnits.toString(), DateTime.now()
+            )
+            HistoryContent.addItem(item)
+
         } else {
             val fromUnits = if (fieldToRead == fromInput) fromVolUnits else toVolUnits
             val toUnits = if (fromUnits == fromVolUnits) toVolUnits else fromVolUnits
+            val dVal = fieldToRead.text.toString().toDouble()
+            val cVal = convert(dVal, fromUnits, toUnits)
+
             fieldToPopulate.setText(
                 convert(fieldToRead.text.toString().toDouble(), fromUnits, toUnits).toString())
+            item = HistoryContent.HistoryItem(
+                dVal, cVal, mode.toString(),
+                toUnits.toString(), fromUnits.toString(), DateTime.now()
+            )
+            HistoryContent.addItem(item)
         }
     }
 
@@ -105,10 +127,12 @@ class MainActivity : AppCompatActivity() {
         val toUnits = findViewById<TextView>(R.id.toUnits)
         findViewById<EditText>(R.id.toInput).text.clear()
         if (isLength) {
+            mode = Mode.Length
             title.text = resources.getText(R.string.lengthTitle)
             fromUnits.text = fromLenUnits.name
             toUnits.text = toLenUnits.name
         } else {
+            mode = Mode.Volume
             title.text = resources.getText(R.string.volumeTitle)
             fromUnits.text = fromVolUnits.name
             toUnits.text = toVolUnits.name
@@ -154,39 +178,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SETTINGS_CODE) {
-            clearFields()
-            if (resultCode == Activity.RESULT_OK) {
-                val intentFromUnits = data?.getStringExtra("FROM_UNITS")
-                val intentToUnits = data?.getStringExtra("TO_UNITS")
-                val fromUnits = findViewById<TextView>(R.id.fromUnits)
-                val toUnits = findViewById<TextView>(R.id.toUnits)
-                if (isLength) {
-                    if (intentFromUnits != null) {
-                        val unitString = LengthUnits.valueOf(intentFromUnits)
-                        fromLenUnits = unitString
-                        fromUnits.text = fromLenUnits.name
-                    }
-
-                    if (intentToUnits != null) {
-                        val unitString = LengthUnits.valueOf(intentToUnits)
-                        toLenUnits = unitString
-                        toUnits.text = toLenUnits.name
-                    }
-                } else {
-                    if (intentFromUnits != null) {
-                        val unitString = VolumeUnits.valueOf(intentFromUnits)
-                        fromVolUnits = unitString
-                        fromUnits.text = fromVolUnits.name
-                    }
-
-                    if (intentToUnits != null) {
-                        val unitString = VolumeUnits.valueOf(intentToUnits)
-                        toVolUnits = unitString
-                        toUnits.text = toVolUnits.name
-                    }
-                }
-            }
+        if (resultCode === SETTINGS_CODE) {
+            this.fromUnits.text = data?.getStringExtra("fromUnits")
+            this.toUnits.text = data?.getStringExtra("toUnits")
+            //updateScreen()
+        } else if (resultCode === HISTORY_CODE) {
+            val vals = data!!.getStringArrayExtra("item")
+            this.fromInput.setText(vals[0])
+            this.toInput.setText(vals[1])
+            this.mode = Mode.valueOf(vals[2])
+            this.fromUnits.text = vals[3]
+            this.toUnits.text = vals[4]
+            this.titleLabel.text = ("$mode Converter")
         }
+
     }
 }
