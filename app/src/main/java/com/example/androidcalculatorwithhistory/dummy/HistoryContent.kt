@@ -19,10 +19,10 @@ object HistoryContent {
 
     init {
         val now: DateTime = DateTime.now()
-        addItem(HistoryItem(2.0, 1.829, "Length", "Yards", "Meters", now.minusDays(1)))
-        addItem(HistoryItem(1.0, 3.785, "Volume", "Gallons", "Liters", now.minusDays(1)))
-        addItem(HistoryItem(2.0, 1.829, "Length", "Yards", "Meters", now.plusDays(1)))
-        addItem(HistoryItem(1.0, 3.785, "Volume", "Gallons", "Liters", now.plusDays(1)))
+        addItem(HistoryItem(2.0, 1.829, "Length", "Yards", "Meters", now.minusDays(1).toString()))
+        addItem(HistoryItem(1.0, 3.785, "Volume", "Gallons", "Liters", now.minusDays(1).toString()))
+        addItem(HistoryItem(2.0, 1.829, "Length", "Yards", "Meters", now.plusDays(1).toString()))
+        addItem(HistoryItem(1.0, 3.785, "Volume", "Gallons", "Liters", now.plusDays(1).toString()))
     }
 
 
@@ -43,9 +43,15 @@ object HistoryContent {
      * A dummy item representing a piece of content.
      */
     class HistoryItem(
-        val fromVal: Double?, val toVal: Double?, val mode: String,
-        val fromUnits: String, val toUnits: String, val timestamp: DateTime
+        val fromVal: Double? = 0.0,
+        val toVal: Double? = 0.0,
+        val mode: String = "Length",
+        val fromUnits: String = "Miles",
+        val toUnits: String = "Meters",
+        val timestamp: String = DateTime.now().toString(),
+        var _key: String = "None"
     ) {
+
 
         override fun toString(): String {
             return this.fromVal.toString() + " " + this.fromUnits + " = " + this.toVal + " " + this.toUnits

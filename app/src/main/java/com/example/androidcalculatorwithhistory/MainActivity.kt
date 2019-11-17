@@ -14,8 +14,26 @@ import com.example.androidcalculatorwithhistory.UnitsConverter.*
 import android.content.Intent
 import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.main.activity_main.*
-import com.example.androidcalculatorwithhistory.dummy.HistoryContent
+import com.google.firebase.database.DatabaseReference
 import org.joda.time.DateTime
+import com.google.firebase.database.FirebaseDatabase
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.R.attr.mode
+import org.joda.time.format.ISODateTimeFormat
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.ChildEventListener
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import com.example.androidcalculatorwithhistory.dummy.HistoryContent
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,15 +42,59 @@ class MainActivity : AppCompatActivity() {
     private var toLenUnits = LengthUnits.Meters
     private var fromVolUnits = VolumeUnits.Gallons
     private var toVolUnits = VolumeUnits.Liters
+    private var topRef: DatabaseReference? = null
+    var allHistory: ArrayList<HistoryContent.HistoryItem> = ArrayList()
 
     object ResultCode {
         val SETTINGS_CODE = 1
         val HISTORY_CODE = 2
     }
 
+    private val chEvListener = object : ChildEventListener {
+        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+            var entry = dataSnapshot.getValue(HistoryContent.HistoryItem::class.java)
+            entry!!._key = dataSnapshot.key.toString()
+            allHistory.add(entry)
+        }
+
+        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
+
+        override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+            val entry = dataSnapshot.getValue(HistoryContent.HistoryItem::class.java)
+            val newHistory = ArrayList<HistoryContent.HistoryItem>()
+            for (t in allHistory) {
+                if (t._key != dataSnapshot.key) {
+                    newHistory.add(t)
+                }
+            }
+            allHistory = newHistory
+        }
+
+        override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+
+        }
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        topRef = FirebaseDatabase.getInstance().getReference("history")
+        topRef!!.addChildEventListener (chEvListener)
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        topRef!!.removeEventListener(chEvListener)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        allHistory = ArrayList()
 
         val calcButton = findViewById<Button>(R.id.calcButton)
         val clearButton = findViewById<Button>(R.id.clearButton)
@@ -102,15 +164,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         // remember the calculation.
+        val fmt = ISODateTimeFormat.dateTime()
         val item = HistoryContent.HistoryItem(
             fromInput.text.toString().toDouble(),
             toInput.text.toString().toDouble(),
             findViewById<TextView>(R.id.titleLabel).text.toString(),
             toUnits.text.toString(),
             fromUnits.text.toString(),
-            DateTime.now()
+            fmt.print(DateTime.now()),
+            fmt.print(DateTime.now())
         )
         HistoryContent.addItem(item)
+        topRef!!.push().setValue(item)
     }
 
     private fun changeMode() {

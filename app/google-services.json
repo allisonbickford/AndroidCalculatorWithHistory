@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1054929877090",
+    "firebase_url": "https://mobiledevhw10.firebaseio.com",
+    "project_id": "mobiledevhw10",
+    "storage_bucket": "mobiledevhw10.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1054929877090:android:d1268b531bdac7b557f93b",
+        "android_client_info": {
+          "package_name": "com.example.androidcalculatorwithhistory"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1054929877090-dvkvubp4enookq9bheuk6hrhudpue6l3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyCcLBC8g_drCZcZQPlvyNGKpm573O600"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1054929877090-dvkvubp4enookq9bheuk6hrhudpue6l3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

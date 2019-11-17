@@ -9,9 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import com.example.androidcalculatorwithhistory.dummy.HistoryContent
-import com.example.androidcalculatorwithhistory.dummy.HistoryContent.HistoryItem
 import androidx.recyclerview.widget.DividerItemDecoration
 
 
@@ -21,11 +19,16 @@ import androidx.recyclerview.widget.DividerItemDecoration
  * [HistoryFragment.OnListFragmentInteractionListener] interface.
  */
 class HistoryFragment : Fragment() {
+    var allHistory: List<HistoryContent.HistoryItem>? = null
 
     // TODO: Customize parameters
     private var columnCount = 1
 
     private var listener: OnListFragmentInteractionListener? = null
+
+    init {
+        allHistory = (activity as MainActivity).allHistory
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +51,7 @@ class HistoryFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = HistoryAdapter(HistoryContent.ITEMS, listener)
+                adapter = HistoryAdapter(allHistory, listener)
 
                 // ??
                 val did = DividerItemDecoration(
@@ -88,7 +91,7 @@ class HistoryFragment : Fragment() {
      */
     interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onListFragmentInteraction(item: HistoryItem)
+        fun onListFragmentInteraction(item: HistoryContent.HistoryItem)
     }
 
     companion object {
