@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.androidcalculatorwithhistory.dummy.HistoryContent;
 import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -34,7 +35,8 @@ public class HistoryAdapter extends
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
 
         for (HistoryContent.HistoryItem hi : items) {
-            String key = "Entries for " + fmt.print(hi.getTimestamp());
+            DateTime t = DateTime.parse(hi.getTimestamp());
+            String key = "Entries for " + fmt.print(t);
             List<HistoryContent.HistoryItem> list = this.dayValues.get(key);
             if (list == null) {
                 list = new ArrayList<>();
