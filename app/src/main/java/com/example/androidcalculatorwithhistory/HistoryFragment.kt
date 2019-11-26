@@ -19,16 +19,16 @@ import androidx.recyclerview.widget.DividerItemDecoration
  * [HistoryFragment.OnListFragmentInteractionListener] interface.
  */
 class HistoryFragment : Fragment() {
-    var allHistory: List<HistoryContent.HistoryItem>? = null
+    private var allHistory: List<HistoryContent.HistoryItem>? = null
+
+    init{
+        allHistory = (activity as MainActivity?)?.allHistory!!
+    }
 
     // TODO: Customize parameters
     private var columnCount = 1
 
     private var listener: OnListFragmentInteractionListener? = null
-
-    init {
-        allHistory = (activity as MainActivity).allHistory
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

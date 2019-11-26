@@ -16,4 +16,6 @@
     <string name="historyLabel">History</string>
     <string name="origination">Origination</string>
     <string name="date_of_calculation">date of calculation</string>
+    <string name="textview">TextView</string>
+    <string name="todo">TODO</string>
 </resources>

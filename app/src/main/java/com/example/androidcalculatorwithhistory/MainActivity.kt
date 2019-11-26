@@ -1,39 +1,29 @@
 package com.example.androidcalculatorwithhistory
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.view.Menu;
-import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.androidcalculatorwithhistory.UnitsConverter.*
-import android.content.Intent
-import android.view.inputmethod.InputMethodManager
-import kotlinx.android.synthetic.main.activity_main.*
-import com.google.firebase.database.DatabaseReference
-import org.joda.time.DateTime
-import com.google.firebase.database.FirebaseDatabase
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.R.attr.mode
-import org.joda.time.format.ISODateTimeFormat
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.ChildEventListener
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import com.example.androidcalculatorwithhistory.dummy.HistoryContent
+import com.example.androidcalculatorwithhistory.webservice.WeatherService.BROADCAST_WEATHER
+import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_main.*
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
+import com.example.androidcalculatorwithhistory.webservice.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,7 +33,11 @@ class MainActivity : AppCompatActivity() {
     private var fromVolUnits = VolumeUnits.Gallons
     private var toVolUnits = VolumeUnits.Liters
     private var topRef: DatabaseReference? = null
-    var allHistory: ArrayList<HistoryContent.HistoryItem> = ArrayList()
+    var allHistory: ArrayList<HistoryContent.HistoryItem>? = null
+
+    private var weatherIcon: ImageView? = null
+    private var current: TextView? = null
+    private var temperature: TextView? = null
 
     object ResultCode {
         val SETTINGS_CODE = 1
@@ -54,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
             var entry = dataSnapshot.getValue(HistoryContent.HistoryItem::class.java)
             entry!!._key = dataSnapshot.key.toString()
-            allHistory.add(entry)
+            allHistory?.add(entry)
         }
 
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
@@ -62,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         override fun onChildRemoved(dataSnapshot: DataSnapshot) {
             val entry = dataSnapshot.getValue(HistoryContent.HistoryItem::class.java)
             val newHistory = ArrayList<HistoryContent.HistoryItem>()
-            for (t in allHistory) {
+            for (t in allHistory!!) {
                 if (t._key != dataSnapshot.key) {
                     newHistory.add(t)
                 }
@@ -83,11 +77,16 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         topRef = FirebaseDatabase.getInstance().getReference("history")
         topRef!!.addChildEventListener (chEvListener)
+
+        val weatherFilter = IntentFilter(BROADCAST_WEATHER)
+        LocalBroadcastManager.getInstance(this).registerReceiver(weatherReceiver, weatherFilter)
     }
 
     public override fun onPause() {
         super.onPause()
         topRef!!.removeEventListener(chEvListener)
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(weatherReceiver)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,6 +98,11 @@ class MainActivity : AppCompatActivity() {
         val calcButton = findViewById<Button>(R.id.calcButton)
         val clearButton = findViewById<Button>(R.id.clearButton)
         val modeButton = findViewById<Button>(R.id.modeButton)
+
+        weatherIcon = this.findViewById(R.id.weatherIcon)
+        current  = this.findViewById(R.id.current)
+        temperature = this.findViewById(R.id.temperature)
+
 
         // set listeners for buttons
         clearButton.setOnClickListener {
@@ -124,6 +128,7 @@ class MainActivity : AppCompatActivity() {
         toInput.setOnFocusChangeListener { _, _ -> fromInput.text.clear() }
     }
 
+
     private fun clearFields() {
         val fromInput = findViewById<EditText>(R.id.fromInput)
         val toInput = findViewById<EditText>(R.id.toInput)
@@ -134,6 +139,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun calculate() {
+        WeatherService.startGetWeather(this, "42.963686", "-85.888595", "p1")
+
         val fromInput = findViewById<EditText>(R.id.fromInput)
         val toInput = findViewById<EditText>(R.id.toInput)
 
@@ -147,6 +154,7 @@ class MainActivity : AppCompatActivity() {
                 }.create().show()
 
         }
+
 
         val fieldToRead = if (fromInput.text.isNotEmpty()) fromInput else toInput
         val fieldToPopulate = if (fromInput.text.isEmpty()) fromInput else toInput
@@ -176,6 +184,23 @@ class MainActivity : AppCompatActivity() {
         )
         HistoryContent.addItem(item)
         topRef!!.push().setValue(item)
+    }
+
+    private val weatherReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val bundle = intent.extras
+            val temp = bundle!!.getDouble("TEMPERATURE")
+            val summary = bundle.getString("SUMMARY")
+            val icon = bundle.getString("ICON")!!.replace("-".toRegex(), "_")
+            val key = bundle.getString("KEY")
+            val resID = resources.getIdentifier(icon, "drawable", packageName)
+            //setWeatherViews(View.VISIBLE);
+            if (key == "p1") {
+                current?.text = summary
+                temperature?.text = java.lang.Double.toString(temp)
+                weatherIcon?.setImageResource(resID)
+            }
+        }
     }
 
     private fun changeMode() {
@@ -283,4 +308,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }
